@@ -1,4 +1,4 @@
-import React from "react";
+import React, {Suspense} from "react";
 import { Outlet } from "react-router-dom";
 import * as Styled from "./index.styles";
 import { Provider } from "react-redux";
@@ -20,8 +20,10 @@ const App = () => {
   );
   return (
     <Provider store={store}>
+      <Suspense fallback={<div>Loading...</div>}>
       <Styled.GlobalStyle />
       <Outlet />
+      </Suspense>
     </Provider>
   );
 };
