@@ -1,6 +1,6 @@
-import React, { KeyboardEvent, ChangeEvent } from "react";
+import React, { KeyboardEvent, ChangeEvent, useRef, useEffect } from "react";
 import * as Styled from "./index.styles";
-import { IconSend } from "../../../../common/icons";
+import { IconChat, IconSend } from "../../../../common/icons";
 import { Axios } from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { saveMessage } from "_actions/message_actions";
@@ -8,14 +8,15 @@ import { saveMessage } from "_actions/message_actions";
 const GPTfunction = () => {
   const dispatch = useDispatch();
   const messagesFromRedux = useSelector((state: any) => state.messages);
+
   const textQuery = async (text: string) => {
     let conversation = {
       who: "user",
       content: text,
     };
 
-    dispatch(saveMessage(conversation));
     console.log(conversation);
+    dispatch(saveMessage(conversation));
 
     const textQueryVariables = {
       text,
@@ -29,14 +30,16 @@ const GPTfunction = () => {
       //   who: "GTP",
       //   content: content,
       // };
-
+      conversation = {
+        who: "GTP",
+        content: "아직 API가 연결되지 않았습니다.",
+      };
       dispatch(saveMessage(conversation));
     } catch (error) {
       conversation = {
         who: "GTP",
         content: "에러가 발생했습니다",
       };
-
       dispatch(saveMessage(conversation));
     }
   };
@@ -56,8 +59,31 @@ const GPTfunction = () => {
 
   return (
     <Styled.BodyContainer>
-      <Styled.LogoName>CustomGPT</Styled.LogoName>
-      <Styled.SubName>우리들의 개발지식 멘토</Styled.SubName>
+      {messagesFromRedux.length === 0 ? (
+        <>
+          <Styled.LogoName>CustomGPT</Styled.LogoName>
+          <Styled.SubName>우리들의 개발지식 멘토</Styled.SubName>
+        </>
+      ) : (
+        <Styled.Content>
+          {messagesFromRedux.map(
+            (message: { who: string; content: string }, i: number) =>
+              message.who === "user" ? (
+                <Styled.UserText key={i}>{message.content}</Styled.UserText>
+              ) : (
+                <Styled.GPTContainer key={i}>
+                  <Styled.NameContainer>
+                    <Styled.IconBox>
+                      <IconChat height="1.5rem" width="1.5rem" fill="white" />
+                    </Styled.IconBox>
+                    <Styled.Logo>CustomGPT</Styled.Logo>
+                  </Styled.NameContainer>
+                  <Styled.GPTText>{message.content}</Styled.GPTText>
+                </Styled.GPTContainer>
+              )
+          )}
+        </Styled.Content>
+      )}
       <Styled.InputBox>
         <Styled.Input
           placeholder="Send a message"
