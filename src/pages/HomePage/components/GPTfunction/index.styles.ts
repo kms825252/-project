@@ -2,8 +2,10 @@ import styled from "styled-components";
 
 export const BodyContainer = styled.div`
   background-color: white;
-  height: 40rem;
-  width: 70rem;
+  //height: 40rem;
+  //width: 71rem;
+  height: 87vh;
+  width: 74vw;
   margin-left: 4.5rem;
   border-radius: 30px;
   display: flex;
@@ -68,7 +70,7 @@ export const Content = styled.div`
 `;
 
 export const GPTContainer = styled.div`
-  margin: 2.5rem 0;
+  padding-bottom: 3rem;
 `;
 
 export const NameContainer = styled.div`
@@ -97,9 +99,11 @@ export const Text = styled.div`
   border-radius: 10px;
   line-height: 2em;
 `;
+export const UserTextContainer = styled.div`
+  padding-bottom: 3rem;
+`;
+
 export const UserText = styled(Text)`
-  //display: flex;
-  //flex-direction: row-reverse;
   background-color: #4c49ed;
   color: white;
   position: relative;

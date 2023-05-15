@@ -1,46 +1,53 @@
 import React, {
   KeyboardEvent,
   ChangeEvent,
-  useRef,
   useEffect,
   useState,
+  useRef,
 } from "react";
 import * as Styled from "./index.styles";
-import { IconChat, IconSend } from "../../../../common/icons";
+import { IconChat, IconSend } from "common/icons";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { saveMessage } from "_actions/message_actions";
-import URLS from "../../../../constants/url";
-import localstorage from "../../../../constants/localstorage";
+import URLS from "constants/url";
+import { saveId } from "_actions/id_actions";
 
 const GPTfunction = () => {
+  const [tempText, setTempText] = useState("");
+  const [flag, setFlag] = useState(false);
   const dispatch = useDispatch();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const idFromRedux = useSelector((state: any) => state.id);
   const [chat, setChat] = useState([]);
-  const messagesFromRedux = useSelector((state: any) => state.messages);
+  const [refresh, setRefresh] = useState(false);
   const textQuery = async (text: string) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    let accessToken = searchParams.get("refresh_token");
     if (idFromRedux) {
       const textQueryVariables = {
         chat: text,
         titleId: idFromRedux,
       };
-      const res = await axios.post(`${URLS.API}/api/chat`, textQueryVariables, {
+      await axios.post(`${URLS.API}/api/chat`, textQueryVariables, {
         headers: {
-          Authorization: `Bearer ${localstorage.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
-      console.log(res);
     } else {
       const textQueryVariables = {
         chat: text,
       };
-      const res = await axios.post(`${URLS.API}/api/chat`, textQueryVariables, {
-        headers: {
-          Authorization: `Bearer ${localstorage.accessToken}`,
-        },
-      });
-      console.log(res);
+      await axios
+        .post(`${URLS.API}/api/chat`, textQueryVariables, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then((res) => {
+          dispatch(saveId(res.data.titleId));
+        });
     }
+    setRefresh(!refresh);
   };
 
   // 질문할때 빈칸이면 alert 띄우기
@@ -51,6 +58,8 @@ const GPTfunction = () => {
       if (!e.target.value) {
         return alert("입력하세요");
       }
+      setFlag(true);
+      setTempText(e.target.value);
       textQuery(e.target.value);
       e.target.value = "";
     }
@@ -60,7 +69,6 @@ const GPTfunction = () => {
     const searchParams = new URLSearchParams(window.location.search);
     let accessToken = searchParams.get("refresh_token");
 
-    console.log(idFromRedux, "idFromRedux");
     if (idFromRedux) {
       axios
         .get(`${URLS.API}/api/chat/${idFromRedux}`, {
@@ -69,19 +77,25 @@ const GPTfunction = () => {
           },
         })
         .then((res) => {
-          console.log(res.data);
-          // console.log(chat.length, "ㅁㄴㅇㄹ");
-          if (res) {
-            console.log(res.data, "ㅁㄴㅇㄹ");
-            setChat(res.data);
-          }
+          setFlag(false);
+          setTempText("");
+          setChat(res.data);
         });
     }
-  }, [idFromRedux]);
+  }, [idFromRedux, refresh]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [chat, tempText]);
 
   return (
     <Styled.BodyContainer>
-      {chat.length === 0 ? (
+      {chat.length === 0 && !tempText ? (
         <>
           <Styled.LogoName>CustomGPT</Styled.LogoName>
           <Styled.SubName>우리들의 개발지식 멘토</Styled.SubName>
@@ -89,13 +103,14 @@ const GPTfunction = () => {
       ) : (
         <Styled.Content>
           {chat.map(
-            (
-              message: { request_id: number; answer: string; chat: string },
-              i: number
-            ) => (
+            (message: { request_id: number; answer: string; chat: string }) => (
               <>
-                <Styled.UserText key={i}>{message.chat}</Styled.UserText>
-                <Styled.GPTContainer key={i}>
+                <Styled.UserTextContainer>
+                  <Styled.UserText key={message.chat}>
+                    {message.chat}
+                  </Styled.UserText>
+                </Styled.UserTextContainer>
+                <Styled.GPTContainer key={message.answer} ref={scrollRef}>
                   <Styled.NameContainer>
                     <Styled.IconBox>
                       <IconChat height="1.5rem" width="1.5rem" fill="white" />
@@ -106,6 +121,13 @@ const GPTfunction = () => {
                 </Styled.GPTContainer>
               </>
             )
+          )}
+          {flag ? (
+            <Styled.UserTextContainer ref={scrollRef}>
+              <Styled.UserText>{tempText}</Styled.UserText>
+            </Styled.UserTextContainer>
+          ) : (
+            void 0
           )}
         </Styled.Content>
       )}

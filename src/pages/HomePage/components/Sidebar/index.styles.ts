@@ -28,7 +28,8 @@ export const SidebarBox = styled.div`
 
 export const SubjectContainer = styled.div`
   width: 87%;
-  height: 26rem;
+  //height: 26rem;
+  height: 59vh;
   overflow: auto;
   padding: 0 1rem;
   ::-webkit-scrollbar {
@@ -84,6 +85,9 @@ export const HomeContainer = styled.div`
   width: 100%;
   background-color: #e4e3ff;
   border-radius: 6px;
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 export const HomeBox = styled.div`
@@ -99,8 +103,14 @@ export const HomeName = styled.h3`
   margin: 0.7rem 0 0.7rem 1rem;
 `;
 export const LogoutContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 16rem;
   height: 3rem;
+  &: hover {
+    cursor: pointer;
+  }
 `;
 
 export const LogoutBox = styled.div`
@@ -114,4 +124,10 @@ export const LogoutBox = styled.div`
 export const LogoutName = styled.h4`
   margin-left: 1rem;
   color: #cccbd8;
+`;
+
+export const IconBox = styled.div`
+  &:hover {
+    cursor: pointer;
+  }
 `;
